@@ -1,0 +1,14 @@
+packages:
+    - name: geonode
+      shared: false
+      functions:
+        - name: geonode
+          binary: false
+          main: ""
+          runtime: python:default
+          web: true
+          websecure: false
+          environment: {
+            "GEO_SERVER_URL": "",
+            "GEO_SERVER_PORT": ""
+        }
