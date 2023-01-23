@@ -1,6 +1,7 @@
 ﻿using GeoNode.Models;
 using System.Text.Json;
 
+
 namespace GeoNode.Helpers
 {
     public class FormDataHelper
@@ -15,11 +16,29 @@ namespace GeoNode.Helpers
 
             var props = dataElement.EnumerateObject();
             var attrs = props.Where(s => !s.Name.Contains("_geolocation")).ToList();
-            foreach (var prop in attrs)
+            foreach (var attr in attrs)
             {
-                formData.Attributes.Add(prop.Name, prop.Value.ToString());
+                var attrName = AttrNameHandler(attr.Name);
+                formData.Attributes.Add(attr.Name, attr.Value.ToString());
             }
             return formData;
         }
+
+        private static string AttrNameHandler(string name)
+        {
+            string newName = name;
+            if (name.Contains("/"))
+            {
+                newName = name.Replace("/", "__");
+
+                if (name.Contains("_"))
+                {
+                    newName = newName.Substring(0, newName.LastIndexOf("_"));
+                }
+            }
+
+            return newName;
+        }
     }
 }
+

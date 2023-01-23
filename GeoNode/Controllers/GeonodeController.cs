@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace KoboMonday.Controllers
+namespace GeoNode.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -14,21 +14,22 @@ namespace KoboMonday.Controllers
     {
         [HttpPost]
         public async Task<IActionResult> Post([FromHeader(Name = "geo_api_url")] string geoNodeApiUrl,
-            [FromHeader(Name = "geo_layer")] string geoLayer ,
+            [FromHeader(Name = "geo_layer")] string geoLayer,
             [FromBody] JsonElement data)
         {
-            var formData = FormDataHelper.GetFormData(data);
-
-            if (formData?.Attributes?.Count == 0)
+            try
             {
-                return StatusCode(400, "empty attributes");
-            }
-            using var http = new HttpClient();
+                var formData = FormDataHelper.GetFormData(data);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, geoNodeApiUrl);
+                using var http = new HttpClient();
 
-            var body =
-              @"<wfs:Transaction service=""WFS"" version=""1.1.0"" xmlns:wfs=""http://www.opengis.net/wfs"" xmlns:gml=""http://www.opengis.net/gml"" xmlns:ogc=""http://www.opengis.net/ogc"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.opengis.net/wfs"" xmlns:geonode=""http://20.193.226.67/"">
+                var request = new HttpRequestMessage(HttpMethod.Post, geoNodeApiUrl);
+
+                var uri = new Uri(geoNodeApiUrl);
+                var baseUri = uri.GetLeftPart(System.UriPartial.Authority);
+
+                var body =
+                  @"<wfs:Transaction service=""WFS"" version=""1.1.0"" xmlns:wfs=""http://www.opengis.net/wfs"" xmlns:gml=""http://www.opengis.net/gml"" xmlns:ogc=""http://www.opengis.net/ogc"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.opengis.net/wfs"" xmlns:geonode=""{4}"">
                     <wfs:Insert>
                         <geonode:{3}>
                             {2}
@@ -41,18 +42,25 @@ namespace KoboMonday.Controllers
                     </wfs:Insert>
                 </wfs:Transaction>";
 
-            var bbody = string.Format(body, formData.Longitude, formData.Latitude, formData.GeoNodeAttributes , geoLayer);
-            request.Content = new StringContent(bbody, Encoding.UTF8, "application/xml");
+                var bbody = string.Format(body, formData.Longitude, formData.Latitude, formData.GeoNodeAttributes, geoLayer, baseUri);
+                request.Content = new StringContent(bbody, Encoding.UTF8, "application/xml");
 
-            var res = await http.SendAsync(request);
+                var res = await http.SendAsync(request);
 
-            // return the response from the geoserver api
-            var rescont = await res.Content.ReadAsStringAsync();
-            if (!res.IsSuccessStatusCode)
-            {
-                return StatusCode((int)res.StatusCode, rescont);
+                // return the response from the geoserver api
+                var rescont = await res.Content.ReadAsStringAsync();
+                if (!res.IsSuccessStatusCode)
+                {
+                    return StatusCode((int)res.StatusCode, rescont);
+                }
+                return Ok();
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                return StatusCode(400, ex.Message);
+            }
+
         }
     }
 }
+    
