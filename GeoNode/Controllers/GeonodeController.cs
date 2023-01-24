@@ -29,7 +29,10 @@ namespace GeoNode.Controllers
                 var baseUri = uri.GetLeftPart(System.UriPartial.Authority);
 
                 var body =
-                  @"<wfs:Transaction service=""WFS"" version=""1.1.0"" xmlns:wfs=""http://www.opengis.net/wfs"" xmlns:gml=""http://www.opengis.net/gml"" xmlns:ogc=""http://www.opengis.net/ogc"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.opengis.net/wfs"" xmlns:geonode=""{4}"">
+                  @"<wfs:Transaction service=""WFS"" version=""1.1.0"" xmlns:wfs=""http://www.opengis.net/wfs"" 
+xmlns:gml=""http://www.opengis.net/gml"" xmlns:ogc=""http://www.opengis.net/ogc"" 
+xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.opengis.net/wfs"" 
+xmlns:geonode=""http://20.193.226.67/"">
                     <wfs:Insert>
                         <geonode:{3}>
                             {2}
@@ -42,7 +45,8 @@ namespace GeoNode.Controllers
                     </wfs:Insert>
                 </wfs:Transaction>";
 
-                var bbody = string.Format(body, formData.Longitude, formData.Latitude, formData.GeoNodeAttributes, geoLayer, baseUri);
+                var b = baseUri?.Substring(0, baseUri.LastIndexOf(":"));
+                var bbody = string.Format(body, formData.Longitude, formData.Latitude, formData.GeoNodeAttributes, geoLayer);
                 request.Content = new StringContent(bbody, Encoding.UTF8, "application/xml");
 
                 var res = await http.SendAsync(request);
@@ -63,4 +67,4 @@ namespace GeoNode.Controllers
         }
     }
 }
-    
+
