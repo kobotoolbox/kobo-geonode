@@ -24,10 +24,15 @@ def get_layer_params(headers: dict) -> list[str]:
 def standardize_fields(fields: dict) -> dict:
     """
     Since GeoNode is unable to handle property names containing '/', we need
-    to replace them with something, in this case '__'.
+    to replace them with something, in this case '__'. Attribute names can also
+    only contain lowercase letters.
     """
     new_fields = {}
     for k, v in fields.items():
+        # Make attribute name lowercase
+        k = k.lower()
+
+        # Handle group hierarchies with `__`
         if '/' in k:
             new_fields[k.replace('/', '__')] = v
         else:
