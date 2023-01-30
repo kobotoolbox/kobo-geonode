@@ -14,7 +14,7 @@ namespace GeoNode.Controllers
     {
         [HttpPost]
         public async Task<IActionResult> Post([FromHeader(Name = "geo_api_url")] string geoNodeApiUrl,
-            [FromHeader(Name = "geo_layer")] string geoLayer,
+            [FromHeader(Name = "geo-layer")] string geoLayer,
             [FromBody] JsonElement data)
         {
             try
@@ -29,10 +29,7 @@ namespace GeoNode.Controllers
                 var baseUri = uri.GetLeftPart(System.UriPartial.Authority);
 
                 var body =
-                  @"<wfs:Transaction service=""WFS"" version=""1.1.0"" xmlns:wfs=""http://www.opengis.net/wfs"" 
-xmlns:gml=""http://www.opengis.net/gml"" xmlns:ogc=""http://www.opengis.net/ogc"" 
-xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.opengis.net/wfs"" 
-xmlns:geonode=""http://20.193.226.67/"">
+                  @"<wfs:Transaction service=""WFS"" version=""1.1.0"" xmlns:wfs=""http://www.opengis.net/wfs"" xmlns:gml=""http://www.opengis.net/gml"" xmlns:ogc=""http://www.opengis.net/ogc"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.opengis.net/wfs"" xmlns:geonode=""{4}"">
                     <wfs:Insert>
                         <geonode:{3}>
                             {2}
@@ -45,8 +42,9 @@ xmlns:geonode=""http://20.193.226.67/"">
                     </wfs:Insert>
                 </wfs:Transaction>";
 
-                var b = baseUri?.Substring(0, baseUri.LastIndexOf(":"));
-                var bbody = string.Format(body, formData.Longitude, formData.Latitude, formData.GeoNodeAttributes, geoLayer);
+                var ServerURL = baseUri?.Substring(0, baseUri.LastIndexOf(":")) + "/";
+
+                var bbody = string.Format(body, formData.Longitude, formData.Latitude, formData.GeoNodeAttributes, geoLayer, ServerURL);
                 request.Content = new StringContent(bbody, Encoding.UTF8, "application/xml");
 
                 var res = await http.SendAsync(request);
@@ -66,5 +64,5 @@ xmlns:geonode=""http://20.193.226.67/"">
 
         }
     }
-}
 
+}
