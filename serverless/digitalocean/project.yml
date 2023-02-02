@@ -7,8 +7,6 @@ packages:
           main: ""
           runtime: python:default
           web: true
-          websecure: false
-          environment: {
-            "GEO_SERVER_URL": "",
-            "GEO_SERVER_PORT": ""
-        }
+          environment:
+            GEO_SERVER_URL: "${GEO_SERVER_URL}"
+            GEO_SERVER_PORT: "${GEO_SERVER_PORT}"
