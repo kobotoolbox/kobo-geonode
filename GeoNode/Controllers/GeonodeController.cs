@@ -42,7 +42,7 @@ namespace GeoNode.Controllers
                 var serverUrl = builder.ToString();
 
                 // Add the access token to the URL.
-                var serverUrlWithToken = serverUrl + "?access_token=" + geoToken;
+                var serverUrlWithToken = serverUrl +"/geoserver/ows?access_token=" + geoToken;
 
                 // Create a new request with the POST method and the URL with the token.
                 var request = new HttpRequestMessage(HttpMethod.Post, serverUrlWithToken);
